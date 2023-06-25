@@ -135,20 +135,20 @@ func login(c *gin.Context) {
 	})
 }
 
-func formTodoList(user string) *TodoList {
+func formTodoList(user string) *map[string]Todo {
 	userTodos := &(todos[user]).Todos
-	len := len(*userTodos)
-	fmt.Println(len)
-	fmt.Println(*userTodos)
-	list := TodoList{}
-	(list).Todos = make([]Todo, len)
-	count := 0
-	for _, v := range *userTodos {
-		(list).Todos[count] = v
-		count = count + 1
-	}
-	fmt.Println(list)
-	return &list
+	// len := len(*userTodos)
+	// fmt.Println(len)
+	// fmt.Println(*userTodos)
+	// list := TodoList{}
+	// (list).Todos = make([]Todo, len)
+	// count := 0
+	// for _, v := range *userTodos {
+	// 	(list).Todos[count] = v
+	// 	count = count + 1
+	// }
+	// fmt.Println(list)
+	return userTodos
 }
 
 func testAPI(c *gin.Context) {
@@ -163,7 +163,7 @@ func getTodos(c *gin.Context) {
 	user := c.MustGet("username").(string)
 	list := formTodoList(user)
 	c.JSON(200, gin.H{
-		"Todos": (*list).Todos,
+		"Todos": list,
 	})
 }
 
@@ -206,7 +206,7 @@ func deleteTodo(c *gin.Context) {
 	delete(*userTodos, todo.Id)
 	list := formTodoList(user)
 	c.JSON(200, gin.H{
-		"Todos": (*list).Todos,
+		"Todos": list,
 	})
 }
 

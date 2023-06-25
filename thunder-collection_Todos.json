@@ -1,7 +1,7 @@
 {
     "client": "Thunder Client",
     "collectionName": "Todos",
-    "dateExported": "2023-06-25T07:56:05.234Z",
+    "dateExported": "2023-06-25T11:47:11.949Z",
     "version": "1.1",
     "folders": [],
     "requests": [
@@ -14,11 +14,11 @@
             "method": "GET",
             "sortNum": 10000,
             "created": "2023-06-24T15:26:22.533Z",
-            "modified": "2023-06-25T07:47:29.242Z",
+            "modified": "2023-06-25T11:09:57.718Z",
             "headers": [
                 {
                     "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJoeXRobSIsImV4cCI6MTY4NzY3OTkxMiwiaXNzIjoiVG9kb0FwcCJ9.-Kg62hEp_w9V2IhSCldj993xY9qg4B1qBimKjVBK_yc"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJoeXRobSIsImV4cCI6MTY4NzY5MjI4NiwiaXNzIjoiVG9kb0FwcCJ9.jNHJ6BXqtMYqCu3JASSS-nS5z9SrepwJvPsR5dkhZN8"
                 }
             ],
             "params": [],
@@ -33,17 +33,21 @@
             "method": "POST",
             "sortNum": 20000,
             "created": "2023-06-24T15:26:36.695Z",
-            "modified": "2023-06-25T05:15:59.134Z",
+            "modified": "2023-06-25T11:41:34.009Z",
             "headers": [
                 {
                     "name": "content-type",
                     "value": "application/json"
+                },
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJoeXRobSIsImV4cCI6MTY4NzY5NDE4NCwiaXNzIjoiVG9kb0FwcCJ9.FgZa2-4yaR7PPcij_ommhgu-4iA4qo31Zl7FCQhagPA"
                 }
             ],
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n  \"text\": \"sdfdsfds Go.ndsfdsffng..\"\n}",
+                "raw": "{\n  \"text\": \"learn go more\"\n}",
                 "form": []
             },
             "tests": []
@@ -57,8 +61,13 @@
             "method": "GET",
             "sortNum": 30000,
             "created": "2023-06-24T17:30:11.098Z",
-            "modified": "2023-06-24T17:30:27.206Z",
-            "headers": [],
+            "modified": "2023-06-25T11:41:38.080Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJoeXRobSIsImV4cCI6MTY4NzY5NDE4NCwiaXNzIjoiVG9kb0FwcCJ9.FgZa2-4yaR7PPcij_ommhgu-4iA4qo31Zl7FCQhagPA"
+                }
+            ],
             "params": [],
             "tests": []
         },
@@ -67,12 +76,17 @@
             "colId": "27190d6a-865b-4ba2-9b72-13a8f40eb21b",
             "containerId": "",
             "name": "deleteTodo",
-            "url": "http://localhost:8080/todo/c9b925f1-4922-4dbf-a934-c5cce353c4b0",
+            "url": "http://localhost:8080/todo/8209d17f-a38f-4352-8903-d083b9de7f63",
             "method": "DELETE",
             "sortNum": 40000,
             "created": "2023-06-24T18:07:32.200Z",
-            "modified": "2023-06-25T05:17:53.072Z",
-            "headers": [],
+            "modified": "2023-06-25T11:40:18.084Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJoeXRobSIsImV4cCI6MTY4NzY5MzY0MCwiaXNzIjoiVG9kb0FwcCJ9.LMzqNefj_nltep6wP10PxkV5VljdYdgzPrzlsCgF4Fo"
+                }
+            ],
             "params": [],
             "tests": []
         },

@@ -1,29 +1,30 @@
 package main
 
-import 
-(
+import (
 	"fmt"
 	"time"
+
 	// "strconv"
 	// "encoding/json"
 	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	// "github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
-var users map[string] User
-var todos map[string] UserTodos
+var users map[string]*User
+var todos map[string]*UserTodos
 
 var mySigningKey = []byte("AllYourBase")
 
 type User struct {
-	Name string `json:"name" binding:"required"`
-	Password string	`json:"password" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type UserTodos struct {
-	Todos  map[string] Todo
+	Todos map[string]Todo
 }
 
 type ID struct {
@@ -31,11 +32,11 @@ type ID struct {
 }
 
 type Todo struct {
-	Id 		string 
-	Text   string `json:"text" binding:"required"`
+	Id   string
+	Text string `json:"text" binding:"required"`
 }
 type TodoList struct {
-	Todos   []Todo 
+	Todos []Todo
 }
 
 type JWTClaims struct {
@@ -45,7 +46,7 @@ type JWTClaims struct {
 
 func JWTParser() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		header := c.Request.Header["Authorization"];
+		header := c.Request.Header["Authorization"]
 		if len(header) == 0 {
 			c.AbortWithStatusJSON(401, gin.H{
 				"error": "Authorization header is missing",
@@ -56,8 +57,8 @@ func JWTParser() gin.HandlerFunc {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return mySigningKey, nil
 		})
-		claims, ok := token.Claims.(jwt.MapClaims);
-	
+		claims, ok := token.Claims.(jwt.MapClaims)
+
 		if token.Valid && ok {
 			fmt.Println("Valid JWT token found")
 			c.Set("username", claims["username"])
@@ -68,11 +69,11 @@ func JWTParser() gin.HandlerFunc {
 			})
 			return
 		}
-		
+
 	}
 }
 
-func getJWTokenString(username string) (string) {
+func getJWTokenString(username string) string {
 	claims := JWTClaims{
 		username,
 		jwt.StandardClaims{
@@ -94,15 +95,15 @@ func register(c *gin.Context) {
 		})
 		return
 	}
-	users[user.Name] = user
-	todos[user.Name] = UserTodos{
-		Todos: make(map[string] Todo),
-	}	
-	
+	users[user.Name] = &user
+	todos[user.Name] = &UserTodos{
+		Todos: make(map[string]Todo),
+	}
+
 	token := getJWTokenString(user.Name)
 	c.JSON(200, gin.H{
-		"response": "User has been registerd with ID: "+user.Name,
-		"token": token,
+		"response": "User has been registerd with ID: " + user.Name,
+		"token":    token,
 	})
 }
 
@@ -130,80 +131,89 @@ func login(c *gin.Context) {
 	token := getJWTokenString(user.Name)
 	c.JSON(200, gin.H{
 		"response": "User has loggedIn",
-		"token": token,
+		"token":    token,
 	})
 }
 
-// func formTodoList() (*TodoList) {
-// 	len := len(todos)
-// 	fmt.Println(len)
-// 	list := TodoList{}
-// 	(list).Todos = make([]Todo, len)
-// 	count := 0
-// 	for _,v := range todos {
-// 		(list).Todos[count] = v
-// 		count = count + 1
-// 	}
-// 	return &list
-// }
+func formTodoList(user string) *TodoList {
+	userTodos := &(todos[user]).Todos
+	len := len(*userTodos)
+	fmt.Println(len)
+	fmt.Println(*userTodos)
+	list := TodoList{}
+	(list).Todos = make([]Todo, len)
+	count := 0
+	for _, v := range *userTodos {
+		(list).Todos[count] = v
+		count = count + 1
+	}
+	fmt.Println(list)
+	return &list
+}
 
 func testAPI(c *gin.Context) {
 	user := c.MustGet("username")
 	c.JSON(200, gin.H{
 		"message": "API is working",
-		"user": user,
+		"user":    user,
 	})
 }
 
-// func getTodos(c *gin.Context) {
-// 	list := formTodoList()
-// 	c.JSON(200, gin.H{
-// 		"Todos": (*list).Todos,
-// 	})
-// }
+func getTodos(c *gin.Context) {
+	user := c.MustGet("username").(string)
+	list := formTodoList(user)
+	c.JSON(200, gin.H{
+		"Todos": (*list).Todos,
+	})
+}
 
-// func addTodo(c *gin.Context) {
-// 	var todoJson Todo
-// 	if err := c.ShouldBindJSON(&todoJson); err != nil {
-// 		c.JSON(400, gin.H{
-// 			"error": err.Error(),
-// 		})
-// 		return
-// 	}
-// 	fmt.Println(todoJson)
-// 	if todoJson.Text != "" {
-// 		var todo = todoJson.Text
-// 		todoId := uuid.NewV4().String()
-// 		todoJson.Id = todoId
-// 		todos[todoId] = todoJson
-// 		c.JSON(200, gin.H{
-// 			"id": todoId,
-// 			"message": "Todo : {"+ todo +"} has been saved.",
-// 		})
-// 		return
-// 	}
-// 	c.JSON(400, gin.H{
-// 		"error": "Something went wrong",
-// 	}) 
-// }
+func addTodo(c *gin.Context) {
+	var todoJson Todo
+	if err := c.ShouldBindJSON(&todoJson); err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	fmt.Println(todoJson)
+	if todoJson.Text != "" {
+		user := c.MustGet("username").(string)
+		var todo = todoJson.Text
+		todoId := uuid.NewV4().String()
+		todoJson.Id = todoId
+		userTodos := todos[user].Todos
+		userTodos[todoId] = todoJson
+		fmt.Println(userTodos)
+		c.JSON(200, gin.H{
+			"id":      todoId,
+			"message": "Todo : {" + todo + "} has been saved.",
+		})
+		return
+	}
+	c.JSON(400, gin.H{
+		"error": "Something went wrong",
+	})
+}
 
-// func deleteTodo(c *gin.Context) {
-// 	var todo ID
-// 	if err := c.ShouldBindUri(&todo); err != nil {
-// 		c.JSON(400, gin.H{"msg": err})
-// 		return
-// 	}
-// 	delete(todos, todo.Id)
-// 	list := formTodoList()
-// 	c.JSON(200, gin.H{
-// 		"Todos": (*list).Todos,
-// 	})
-// }
+func deleteTodo(c *gin.Context) {
+	var todo ID
+	if err := c.ShouldBindUri(&todo); err != nil {
+		c.JSON(400, gin.H{"msg": err})
+		return
+	}
+	user := c.MustGet("username").(string)
+	userTodos := &(todos[user]).Todos
+	delete(*userTodos, todo.Id)
+	list := formTodoList(user)
+	c.JSON(200, gin.H{
+		"Todos": (*list).Todos,
+	})
+}
 
 func main() {
 	route := gin.Default()
-	users = make(map[string] User)
-	todos = make(map[string] UserTodos)
+	users = make(map[string]*User)
+	todos = make(map[string]*UserTodos)
 
 	route.POST("/register", register)
 	route.POST("/login", login)
@@ -212,9 +222,10 @@ func main() {
 	authorized.Use(JWTParser())
 	{
 		authorized.GET("/test", testAPI)
+		authorized.POST("/add", addTodo)
+		authorized.GET("/todos", getTodos)
+		authorized.DELETE("/todo/:id", deleteTodo)
 	}
-	// route.GET("/todos", getTodos)
-	// route.POST("/add", addTodo)
-	// route.DELETE("/todo/:id", deleteTodo)
+
 	route.Run() // listen and serve on 0.0.0.0:8080
 }

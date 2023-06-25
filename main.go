@@ -2,20 +2,20 @@ package main
 
 import (
 	"fmt"
-	"strconv"
+	// "strconv"
 	// "encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/satori/go.uuid"
 )
 
-var todos map[int] string
-var counter int
+var todos map[string] Todo
 
 type ID struct {
 	Id string `uri:"id" binding:"required"`
 }
 
 type Todo struct {
-	Id string 
+	Id 		string 
 	Text   string `json:"text" binding:"required"`
 }
 type TodoList struct {
@@ -28,11 +28,8 @@ func formTodoList() (*TodoList) {
 	list := TodoList{}
 	(list).Todos = make([]Todo, len)
 	count := 0
-	for k,v := range todos {
-		(list).Todos[count] = Todo{
-			Id: strconv.Itoa(k),
-			Text: v,
-		}
+	for _,v := range todos {
+		(list).Todos[count] = v
 		count = count + 1
 	}
 	return &list
@@ -45,14 +42,6 @@ func testAPI(c *gin.Context) {
 
 func getTodos(c *gin.Context) {
 	list := formTodoList()
-	// res, err := json.Marshal(list)
-	// if err != nil {
-	// 	c.JSON(400, gin.H{
-	// 		"error": err.Error(),
-	// 	})
-	// 	return
-	// }
-	// fmt.Println(res)
 	c.JSON(200, gin.H{
 		"Todos": (*list).Todos,
 	})
@@ -69,10 +58,11 @@ func addTodo(c *gin.Context) {
 	fmt.Println(todoJson)
 	if todoJson.Text != "" {
 		var todo = todoJson.Text
-		counter++
-		todos[counter] = todo
+		todoId := uuid.NewV4().String()
+		todoJson.Id = todoId
+		todos[todoId] = todoJson
 		c.JSON(200, gin.H{
-			"id": counter,
+			"id": todoId,
 			"message": "Todo : {"+ todo +"} has been saved.",
 		})
 		return
@@ -88,11 +78,7 @@ func deleteTodo(c *gin.Context) {
 		c.JSON(400, gin.H{"msg": err})
 		return
 	}
-	fmt.Println(todo)
-	id, _ := strconv.Atoi(todo.Id)
-	fmt.Println(id)
-	delete(todos, id)
-	fmt.Println(todos)
+	delete(todos, todo.Id)
 	list := formTodoList()
 	c.JSON(200, gin.H{
 		"Todos": (*list).Todos,
@@ -101,8 +87,7 @@ func deleteTodo(c *gin.Context) {
 
 func main() {
 	route := gin.Default()
-	todos = make(map[int] string)
-	counter = 0
+	todos = make(map[string] Todo)
 	route.GET("/test", testAPI)
 	route.GET("/todos", getTodos)
 	route.POST("/add", addTodo)

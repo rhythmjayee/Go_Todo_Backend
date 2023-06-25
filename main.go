@@ -56,9 +56,11 @@ func JWTParser() gin.HandlerFunc {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return mySigningKey, nil
 		})
+		claims, ok := token.Claims.(jwt.MapClaims);
 	
-		if token.Valid {
+		if token.Valid && ok {
 			fmt.Println("Valid JWT token found")
+			c.Set("username", claims["username"])
 			c.Next()
 		} else {
 			c.AbortWithStatusJSON(401, gin.H{
@@ -146,8 +148,10 @@ func login(c *gin.Context) {
 // }
 
 func testAPI(c *gin.Context) {
+	user := c.MustGet("username")
 	c.JSON(200, gin.H{
 		"message": "API is working",
+		"user": user,
 	})
 }
 

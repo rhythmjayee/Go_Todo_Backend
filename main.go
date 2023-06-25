@@ -1,9 +1,12 @@
 package main
 
-import (
-	// "fmt"
+import 
+(
+	"fmt"
+	"time"
 	// "strconv"
 	// "encoding/json"
+	"strings"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	// "github.com/satori/go.uuid"
@@ -40,11 +43,38 @@ type JWTClaims struct {
 	jwt.StandardClaims
 }
 
+func JWTParser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		header := c.Request.Header["Authorization"];
+		if len(header) == 0 {
+			c.AbortWithStatusJSON(401, gin.H{
+				"error": "Authorization header is missing",
+			})
+			return
+		}
+		tokenString := strings.Split(c.Request.Header["Authorization"][0], " ")[1]
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return mySigningKey, nil
+		})
+	
+		if token.Valid {
+			fmt.Println("Valid JWT token found")
+			c.Next()
+		} else {
+			c.AbortWithStatusJSON(401, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		
+	}
+}
+
 func getJWTokenString(username string) (string) {
 	claims := JWTClaims{
 		username,
 		jwt.StandardClaims{
-			ExpiresAt: 15000,
+			ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
 			Issuer:    "TodoApp",
 		},
 	}
@@ -170,9 +200,15 @@ func main() {
 	route := gin.Default()
 	users = make(map[string] User)
 	todos = make(map[string] UserTodos)
+
 	route.POST("/register", register)
 	route.POST("/login", login)
-	route.GET("/test", testAPI)
+
+	authorized := route.Group("/")
+	authorized.Use(JWTParser())
+	{
+		authorized.GET("/test", testAPI)
+	}
 	// route.GET("/todos", getTodos)
 	// route.POST("/add", addTodo)
 	// route.DELETE("/todo/:id", deleteTodo)
